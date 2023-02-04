@@ -1,0 +1,3 @@
+parser的主要目的就是将lexer(词法分析)得到的tokens进行处理，得到ast数据结构。
+在编写parser的过程中，核心是针对不同的语句，会有不同的表示结构。既ast包下的node结构
+然后在ParseProgram方法中去解析源码中的代码，翻译为ast中具体的node结构。
