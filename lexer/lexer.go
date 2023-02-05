@@ -1,6 +1,8 @@
 package lexer
 
-import "interpreter-in-go/token"
+import (
+	"interpreter-in-go/token"
+)
 
 type Lexer struct {
 	input        string // 待解析的源代码
@@ -75,6 +77,9 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+	case '"':
+		tok.Type = token.STRING
+		tok.Literal = l.readString()
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
@@ -91,6 +96,18 @@ func (l *Lexer) NextToken() token.Token {
 
 	l.readChar()
 	return tok
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		// 一直读取到遇到 ", 最后返回string
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+	return l.input[position:l.position]
 }
 
 func (l *Lexer) readIdentifier() string {
