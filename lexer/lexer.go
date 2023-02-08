@@ -4,6 +4,7 @@ import (
 	"interpreter-in-go/token"
 )
 
+// Lexer 核心就是一个字符一个字符的检查，根据不同的字符进行不同的处理
 type Lexer struct {
 	input        string // 待解析的源代码
 	position     int    // 当前解析到的字符位置
@@ -11,8 +12,10 @@ type Lexer struct {
 	ch           byte   // 当前解析的字符
 }
 
+// New 创建Lexer， input is source code
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
+	// 调用readChar 初始化position和readPostion
 	l.readChar()
 	return l
 }
@@ -30,7 +33,7 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	l.skipWhitespace()
-	switch l.ch {
+	switch l.ch { // switch 中针对每种标识，构建对应的token
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.ch
@@ -57,10 +60,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{
-				Type:    token.NOT_EQ,
-				Literal: string(ch) + string(l.ch),
-			}
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
 		} else {
 			tok = newToken(token.BANG, l.ch)
 		}
@@ -74,9 +74,6 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LT, l.ch)
 	case '>':
 		tok = newToken(token.GT, l.ch)
-	case 0:
-		tok.Literal = ""
-		tok.Type = token.EOF
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
@@ -86,6 +83,9 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.RBRACKET, l.ch)
 	case ':':
 		tok = newToken(token.COLON, l.ch)
+	case 0:
+		tok.Literal = ""
+		tok.Type = token.EOF
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()

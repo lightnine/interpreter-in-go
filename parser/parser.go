@@ -22,12 +22,12 @@ const (
 
 type Parser struct {
 	l         *lexer.Lexer
-	curToken  token.Token
-	peekToken token.Token
-	errors    []string // 记录错误内容
+	curToken  token.Token // 当前的token
+	peekToken token.Token // 下一个token
+	errors    []string    // 记录错误内容
 
-	prefixParseFns map[token.TokenType]prefixParseFn
-	infixParseFns  map[token.TokenType]infixParseFn
+	prefixParseFns map[token.TokenType]prefixParseFn // 保存前缀表达式中TokenType和解析函数的映射
+	infixParseFns  map[token.TokenType]infixParseFn  // 保存中缀表达式中TokenType和解析函数的映射
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -63,6 +63,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
+	// 调用两次，给curToken和peekToken进行初始化
 	p.nextToken()
 	p.nextToken()
 	return p

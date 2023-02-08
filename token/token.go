@@ -2,7 +2,7 @@ package token
 
 type TokenType string
 
-// Token 代表语言中的token
+// Token 代表语言中的token, 包含token类型以及对应的字面量
 type Token struct {
 	Type    TokenType
 	Literal string
