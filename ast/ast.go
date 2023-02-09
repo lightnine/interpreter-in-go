@@ -21,6 +21,7 @@ type Expression interface {
 	expressionNode()
 }
 
+// 用program表示源代码，源码中语句对应的是这里的切片Statements
 type Program struct {
 	Statements []Statement
 }

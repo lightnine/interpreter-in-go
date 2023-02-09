@@ -99,6 +99,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	// 解析支持三种语句，分别为let，return以及其他
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
@@ -107,18 +108,6 @@ func (p *Parser) parseStatement() ast.Statement {
 	default:
 		return p.parseExpressionStatement()
 	}
-}
-
-func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
-	stmt := &ast.ReturnStatement{Token: p.curToken}
-	p.nextToken()
-
-	stmt.ReturnValue = p.parseExpression(LOWEST)
-
-	for !p.curTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
-	return stmt
 }
 
 // 解析let statement
@@ -138,7 +127,20 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	p.nextToken()
 	stmt.Value = p.parseExpression(LOWEST)
 
+	// 如果下一个token是';', 则调用nextToken跳过';'
 	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.curToken}
+	p.nextToken()
+
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	for !p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 	return stmt
@@ -157,6 +159,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
+	// 先获取前缀处理逻辑
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -164,6 +167,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 	leftExp := prefix()
 
+	// 进行中缀表达式处理
 	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
